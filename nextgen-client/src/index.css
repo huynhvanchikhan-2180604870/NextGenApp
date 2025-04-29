@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+.ReactTags__selected span.ReactTags__tag {
+    border: none;
+    background: rgb(219 234 254);
+    color: rgb(29 78 216);
+    padding: 4px 8px;
+    margin: 0 4px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ReactTags__remove {
+    margin-left: 4px;
+    cursor: pointer;
+    color: rgb(29 78 216);
+}
+
+.ReactTags__tagInput {
+    flex: 1;
+    margin-top: 8px;
+}
+
+.ReactTags__tagInput input {
+    width: 100%;
+    padding: 8px 16px;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 8px;
+}
+
+.ReactTags__tagInput input:focus {
+    outline: none;
+    border-color: #516349;
+    ring: 2px solid #516349;
+}
