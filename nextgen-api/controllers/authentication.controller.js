@@ -24,7 +24,7 @@ exports.signup = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "Email already exists" });
+        .json({ success: false, message: "Địa chỉ email đã được sử dụng" });
     }
 
     const hashedPassword = await doHash(password, 12);
@@ -37,7 +37,7 @@ exports.signup = async (req, res) => {
     savedUser.password = undefined; // Remove password from the response
     return res.status(201).json({
       success: true,
-      message: "User created successfully",
+      message: "Đăng ký thành công",
       data: savedUser,
     });
   } catch (error) {
@@ -58,14 +58,14 @@ exports.signin = async (req, res) => {
     });
     console.log("Validation Result:", value);
     if (error) {
-      return res.status(401).json({ success: false, message: error.message });
+      return res.status(401).json({ success: false, message: "Thông tin không hợp lệ" });
     }
     const existingUser = await User.findOne({ email }).select("+password");
     console.log("Existing User:", existingUser);
     if (!existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+        .json({ success: false, message: "Địa chỉ email không tồn tại" });
     }
 
     const result = await compareHash(password, existingUser.password);
@@ -73,7 +73,7 @@ exports.signin = async (req, res) => {
     if (!result) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+        .json({ success: false, message: "Mật khẩu không chính xác" });
     }
     const token = jwt.sign(
       {
@@ -97,7 +97,7 @@ exports.signin = async (req, res) => {
       .json({
         success: true,
         token,
-        message: "User logged in successfully",
+        message: "Đăng nhập thành công",
       });
   } catch (error) {
     console.error("Error during signin:", error);
@@ -123,12 +123,12 @@ exports.sendVerificationCode = async (req, res) => {
     if (!existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "Email not found" });
+        .json({ success: false, message: "Không tìm thấy địa chỉ email" });
     }
     if (existingUser.isVerified) {
       return res
         .status(400)
-        .json({ success: false, message: "Email already verified" });
+        .json({ success: false, message: "Tài khoản đã được xác thực" });
     }
     const verificationCode = Math.floor(Math.random() * 1000000).toString();
     let infor = await transport.sendMail({
@@ -167,28 +167,28 @@ exports.verifyVerificationCode = async (req, res) => {
       stripUnknown: true, // (optional) remove unexpected keys
     });
     if (error) {
-      return res.status(401).json({ success: false, message: error.message });
+      return res.status(401).json({ success: false, message: "Mã xác thực không hợp lệ" });
     }
     const codeValue = providedCode.toString();
     const existingUser = await User.findOne({ email }).select("+verificationCode +verificationCodeValidation");
     if (!existingUser) {
       return res
         .status(401)
-        .json({ success: false, message: "User not found" });
+        .json({ success: false, message: "Địa chỉ email không tồn tại" });
     }
     if (existingUser.isVerified) {
       return res
         .status(400)
-        .json({ success: false, message: "Email already verified" });
+        .json({ success: false, message: "Tài khoản đã được xác thực" });
     }
 
     if(!existingUser.verificationCode || !existingUser.verificationCodeValidation){
 
-      return res.status(400).json({ success: false, message: "something is wrong with the code" });
+      return res.status(400).json({ success: false, message: "Mã xác thực không chính xác" });
     }
 
     if(Date.now() - existingUser.verificationCodeValidation > 10 * 60 * 1000){
-      return res.status(400).json({ success: false, message: "Verification code expired" });
+      return res.status(400).json({ success: false, message: "Mã xác thực đã hết hạn" });
     }
 
     const hashedCodeValue = hmacProcess(
@@ -202,10 +202,12 @@ exports.verifyVerificationCode = async (req, res) => {
       await existingUser.save();
       return res.status(200).json({
         success: true,
-        message: "Email verified successfully",
+        message: "Xác thực tài khoản thành công, vui lòng đăng nhập lại",
       });
     }
-    return res.status(400).json({ success: false, message: "unexpected occrured" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Mã xác thực không chính xác" });
   }catch (error) {
     console.error("Error during verifyVerificationCode:", error);
     return res.status(500).json({ message: "Internal server error" });

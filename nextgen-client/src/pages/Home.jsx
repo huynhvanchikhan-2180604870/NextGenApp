@@ -23,7 +23,7 @@ const Home = () => {
       // dispatch(fetchProducts());
     console.log("products: ", products);
     // Fetch products
-  }, [dispatch]);
+  }, [dispatch,products]);
   return (
     <div className="pt-16 bg-gray-50">
       {/* Carousel Section */}

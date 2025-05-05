@@ -3,18 +3,19 @@ import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
-  FaChevronDown,
+  FaBox,
   FaChevronRight,
   FaCode,
-  FaEdit,
-  FaImage,
-  FaTimes,
-  FaTrash,
-  FaBox,
   FaDollarSign,
   FaFileAlt,
+  FaImage,
   FaLink,
+  FaTimes,
 } from "react-icons/fa";
+import {
+  MdKeyboardDoubleArrowDown,
+  MdOutlineKeyboardArrowUp,
+} from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { WithContext as ReactTags } from "react-tag-input";
 import { fetchCategories } from "../store/features/categories/categorySlice";
@@ -24,7 +25,7 @@ import {
   fetchProducts,
   updateProduct,
 } from "../store/features/products/productSlice";
-
+import ProductForm from "./ProductForm";
 const ProductManager = () => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
@@ -238,30 +239,38 @@ const ProductManager = () => {
       <div className="relative mb-6">
         <motion.button
           onClick={() => setIsFormVisible(!isFormVisible)}
-          className="absolute left-1/2 -translate-x-1/2 -top-3 bg-[#516349] text-white px-6 py-2.5 rounded-full flex items-center gap-2 hover:bg-[#516349]/90 transition-all shadow-lg hover:shadow-xl"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="absolute left-1/2 -translate-x-1/2 -top-3 bg-white text-gray-500  rounded-full flex flex-col items-center justify-center"
+          whileTap={{ scale: 0.9 }}
         >
           <AnimatePresence mode="wait">
             <motion.span
               key={isFormVisible ? "hide" : "show"}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="whitespace-nowrap"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                y: [0, -8, 0], // lên xuống nhẹ
+              }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                repeatType: "loop",
+                ease: "easeInOut",
+              }}
+              className="flex flex-col items-center gap-1"
             >
-              {isFormVisible ? "Ẩn biểu mẫu" : "Thêm sản phẩm mới"}
+              {isFormVisible ? (
+                <>
+                  <MdOutlineKeyboardArrowUp className="text-5xl" />
+                  <span className="text-sm font-medium">Thu gọn</span>
+                </>
+              ) : (
+                <>
+                  <MdKeyboardDoubleArrowDown className="text-5xl" />
+                  <span className="text-sm font-medium">Mở rộng</span>
+                </>
+              )}
             </motion.span>
           </AnimatePresence>
-          <motion.div
-            animate={{
-              rotate: isFormVisible ? 180 : 0,
-              scale: isFormVisible ? 1.2 : 1,
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <FaChevronDown />
-          </motion.div>
         </motion.button>
       </div>
 
@@ -275,7 +284,7 @@ const ProductManager = () => {
             transition={{ duration: 0.3 }}
             className="overflow-hidden mb-6"
           >
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 mt-[40px]">
               <form
                 onSubmit={handleSubmit}
                 className="max-w-4xl mx-auto space-y-8"
@@ -825,148 +834,15 @@ const ProductManager = () => {
       </AnimatePresence>
 
       {/* Products Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sản phẩm
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Giá
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Danh mục
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Công nghệ
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Thống kê
-                </th>
-                <th className="px-6 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <AnimatePresence>
-                {products.map((product) => {
-                  const { categoryName, subCategoryName } = getCategoryInfo(
-                    product.category,
-                    product.subCategory
-                  );
-
-                  return (
-                    <motion.tr
-                      key={product._id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-12 w-12 flex-shrink-0">
-                            <img
-                              className="h-12 w-12 rounded-lg object-cover shadow-sm"
-                              src={`http://localhost:3000${
-                                product.coverImage
-                              }`}
-                              alt={product.name}
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {product.name}
-                            </div>
-                            <div className="text-sm text-gray-500 max-w-xs truncate">
-                              {product.shortDescription}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(product.price)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="space-y-1">
-                          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-[#516349]/10 text-[#516349]">
-                            {categoryName}
-                          </span>
-                          {subCategoryName !== "None" && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-600">
-                                {subCategoryName}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {product.technologies.map((tech) => (
-                            <span
-                              key={tech._id}
-                              className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600"
-                            >
-                              {tech.name}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                              {product.downloads}
-                            </span>
-                            lượt tải
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="font-medium">{product.views}</span>
-                            lượt xem
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-3">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => {
-                              setEditingProduct(product);
-                              setIsFormVisible(true);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
-                          >
-                            <FaEdit className="w-5 h-5" />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handleDelete(product._id)}
-                            className="text-red-600 hover:text-red-900 transition-colors"
-                          >
-                            <FaTrash className="w-5 h-5" />
-                          </motion.button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <ProductForm
+        products={products}
+        onEdit={(product) => {
+          setEditingProduct(product);
+          setIsFormVisible(true);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };

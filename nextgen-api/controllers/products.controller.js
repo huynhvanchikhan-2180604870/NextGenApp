@@ -18,7 +18,7 @@ exports.createProduct = async (req, res) => {
       category,
       subCategory,
     } = req.body;
-    console.log("Create product Data: ",req.body);
+    console.log("Create product Data: ", req.body);
     // Validate required fields
     if (!name || !price || !shortDescription || !description || !installation) {
       return res.status(400).json({
@@ -64,7 +64,7 @@ exports.createProduct = async (req, res) => {
       technologies: techIds,
       category,
       subCategory,
-    //   author: req.user._id, // Assuming you have authentication middleware
+      //   author: req.user._id, // Assuming you have authentication middleware
     });
 
     await newProduct.save();
@@ -98,14 +98,7 @@ exports.createProduct = async (req, res) => {
 // Get all products with filtering and pagination
 exports.getProducts = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      category,
-      search,
-      technology,
-      sort = "-createdAt",
-    } = req.query;
+    const { category, search, technology, sort = "-createdAt" } = req.query;
 
     const query = { isActive: true };
 
@@ -125,21 +118,13 @@ exports.getProducts = async (req, res) => {
 
     const products = await Product.find(query)
       .populate("technologies", "name icon")
-      .sort(sort)
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .sort(sort);
 
     const total = await Product.countDocuments(query);
 
     return res.status(200).json({
       success: true,
       data: products,
-      pagination: {
-        total,
-        pages: Math.ceil(total / limit),
-        currentPage: page * 1,
-        limit: limit * 1,
-      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -153,8 +138,10 @@ exports.getProducts = async (req, res) => {
 // Get single product
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id)
-      .populate("technologies", "name icon")
+    const product = await Product.findById(req.params.id).populate(
+      "technologies",
+      "name icon"
+    );
 
     if (!product) {
       return res.status(404).json({

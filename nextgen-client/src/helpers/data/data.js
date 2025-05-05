@@ -150,12 +150,12 @@ export const sampleProducts = [
   },
 ];
 
-export const getRelatedProducts = (currentProduct, limit = 4) => {
-  return sampleProducts
+export const getRelatedProducts = (products,currentProduct, limit = 4) => {
+  return products
     .filter(
       (product) =>
-        product.id !== currentProduct.id &&
-        (product.category === currentProduct.category ||
+        product._id !== currentProduct._id &&
+        (product.category._id === currentProduct.category._id ||
           product.technologies.some((tech) =>
             currentProduct.technologies.includes(tech)
           ))

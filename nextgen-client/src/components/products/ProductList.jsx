@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import FilterPanel from "../category/FilterPanel";
 import Card from "../widgets/card/Card";
 import SortOptions from "../widgets/ui/SortOptions";
@@ -9,20 +8,20 @@ const ProductList = ({ products }) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
-  const [productsPerPage, setProductsPerPage] = useState(16);
+  const [productsPerPage, setProductsPerPage] = useState(9); // Changed from 16 to 9
   const [isLoading, setIsLoading] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
     categories: [],
     subCategories: [],
     priceRanges: [],
   });
+
   // Handle responsive
   useEffect(() => {
-    console.log("products in product list: ", products);
     const handleResize = () => {
       const mobile = window.innerWidth < 640;
       setIsMobile(mobile);
-      setProductsPerPage(mobile ? 4 : 16);
+      setProductsPerPage(mobile ? 4 : 9); // Changed from 16 to 9 for desktop
       setCurrentPage(1);
     };
 
@@ -31,6 +30,11 @@ const ProductList = ({ products }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Initialize filtered products
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
+
   // Handle filter changes with multiple selections
   const handleFilterChange = ({ categories, subCategories, priceRanges }) => {
     setIsLoading(true);
@@ -38,7 +42,7 @@ const ProductList = ({ products }) => {
 
     setTimeout(() => {
       let filtered = [...products];
-      console.log("activeFilters: ", filtered);
+
       // Apply category filters (OR logic within categories)
       if (categories && categories.length > 0) {
         filtered = filtered.filter((product) =>
@@ -81,9 +85,7 @@ const ProductList = ({ products }) => {
       setIsLoading(false);
     }, 500);
   };
-useEffect(() => {
-  setFilteredProducts(products);
-}, [products]);
+
   // Handle sorting
   const handleSortChange = (sortType) => {
     setIsLoading(true);
@@ -100,6 +102,9 @@ useEffect(() => {
           break;
         case "popular":
           sorted.sort((a, b) => b.downloads - a.downloads);
+          break;
+        case "views":
+          sorted.sort((a, b) => b.views - a.views);
           break;
         case "newest":
           sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

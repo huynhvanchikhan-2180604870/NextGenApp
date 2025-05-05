@@ -1,39 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { getRelatedProducts, sampleProducts } from "../../helpers/data/data";
+import { fetchProduct } from "../../store/features/products/productSlice";
 import ProductDetail from "./ProductDetail";
-
 
 const ProductDetailContainer = () => {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  const dispatch = useDispatch();
+  const { product } = useSelector((state) => state.products);
   useEffect(() => {
     // Giả lập API call
-    const loadProduct = async () => {
-      try {
-        // Tìm sản phẩm theo id
-        const foundProduct = sampleProducts.find((p) => p.id === id);
-        setProduct(foundProduct);
-
-        if (foundProduct) {
-          // Lấy sản phẩm liên quan
-          const related = getRelatedProducts(foundProduct);
-          setRelatedProducts(related);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProduct();
+    dispatch(fetchProduct(id));
   }, [id]);
 
-  if (loading) {
+  if (product === undefined) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#516349]" />
@@ -57,7 +37,7 @@ const ProductDetailContainer = () => {
     );
   }
 
-  return <ProductDetail product={product} relatedProducts={relatedProducts} />;
+  return <ProductDetail product={product} relatedProducts={product} />;
 };
 
 export default ProductDetailContainer;

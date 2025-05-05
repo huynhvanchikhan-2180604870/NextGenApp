@@ -51,7 +51,14 @@ const ProductDetail = ({ product, relatedProducts }) => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-xl p-4"
           >
-            <Carousel images={product.images} />
+            <Carousel
+              images={product.images.map((banner) => ({
+                // The banner.image already includes '/uploads/banners/' path
+                url: `http://localhost:3000${banner}`,
+                title: banner.title,
+              }))}
+            />
+            {/* <Carousel images={product.images} /> */}
           </motion.div>
 
           {product.videoUrl && (
@@ -117,7 +124,7 @@ const ProductDetail = ({ product, relatedProducts }) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {tech}
+                  {tech.name}
                 </motion.span>
               ))}
             </div>
